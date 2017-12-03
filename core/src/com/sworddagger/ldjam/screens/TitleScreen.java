@@ -32,6 +32,7 @@ public class TitleScreen extends ScreenAdapter {
 			}
 		});
 		stage.addActor(button);
+		stage.setDebugAll(true);
 	}
 
 	@Override
