@@ -66,15 +66,12 @@ public class Level {
 	}
 
 	public boolean canWalk(Vector2 start, Vector2 target) {
-		Rectangle rect1 = new Rectangle(start.x > target.x ? start.x - 8 : start.x,
-										start.y > target.y ? start.y - 8 : start.y,
-										start.y == target.y ? TILE_SIZE + 8 : TILE_SIZE,
-										start.y < target.y ? TILE_SIZE : 8);
-		//TILE_SIZE * ((start.x != target.x) ?  1.5f : 1),
-		//TILE_SIZE * ((start.y != target.y) ? 1.5f : 1));
-		//Rectangle rect1 = new Rectangle(target.x, start.y < target.y ? target.y : start.y - TILE_SIZE / 2,TILE_SIZE / 2f,TILE_SIZE / 2f);
-		for (Rectangle rect2 : wallRects) {
-			if (rect1.overlaps(rect2)) {
+		Rectangle heroRect = new Rectangle(start.x > target.x ? start.x - 8 : start.x,
+										   start.y > target.y ? start.y - 8 : start.y,
+										   start.y == target.y ? TILE_SIZE + 8 : TILE_SIZE,
+										   start.y < target.y ? TILE_SIZE : 8);
+		for (Rectangle wallRect : wallRects) {
+			if (heroRect.overlaps(wallRect)) {
 				return false;
 			}
 		}
