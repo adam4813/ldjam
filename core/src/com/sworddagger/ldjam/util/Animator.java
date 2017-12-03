@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.sworddagger.ldjam.Level;
 
 import static com.sworddagger.ldjam.LDJamGame.SCREEN_HEIGHT;
 import static com.sworddagger.ldjam.LDJamGame.SCREEN_WIDTH;
@@ -36,6 +37,7 @@ public class Animator extends Image {
 	private boolean walkLeft = false;
 	private boolean walkRight = false;
 	private DIRECTION facingDirection = DIRECTION.DOWN;
+	private Level level;
 
 	public void startWalking(DIRECTION direction) {
 		switch (direction) {
@@ -71,7 +73,13 @@ public class Animator extends Image {
 		}
 	}
 
-	public enum DIRECTION {UP, DOWN, LEFT, RIGHT};
+	public void setLevel(Level level) {
+		this.level = level;
+	}
+
+	public enum DIRECTION {UP, DOWN, LEFT, RIGHT}
+
+	;
 
 	private Texture spriteSheet;
 
@@ -130,6 +138,7 @@ public class Animator extends Image {
 	}
 
 	static private Interpolation interpolation = Interpolation.linear;
+
 	@Override
 	public void act(float delta) {
 		if (interpolationAccumulator > TILES_PRE_SECOND) {
@@ -162,6 +171,9 @@ public class Animator extends Image {
 						target.x += TILE_SIZE;
 					}
 					facingDirection = DIRECTION.RIGHT;
+				}
+				if (!level.canWalk(start, target)) {
+					target.set(start);
 				}
 			}
 			interpolationAccumulator += delta;

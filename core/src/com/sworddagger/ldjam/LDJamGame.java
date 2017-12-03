@@ -2,7 +2,6 @@ package com.sworddagger.ldjam;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.sworddagger.ldjam.screens.GameScreen;
@@ -15,13 +14,10 @@ public class LDJamGame extends Game {
 	private GameScreen gameScreen;
 	private TitleScreen titleScreen;
 	private Skin skin;
-	private SpriteBatch batch;
 
 	@Override
 	public void create() {
 		Gdx.graphics.setWindowedMode(SCREEN_WIDTH, SCREEN_HEIGHT);
-
-		batch = new SpriteBatch();
 
 		TextureAtlas atlas = new TextureAtlas(Gdx.files.internal("data/uiskin.atlas"));
 		skin = new Skin(Gdx.files.internal("data/uiskin.json"), atlas);
@@ -35,7 +31,6 @@ public class LDJamGame extends Game {
 	@Override
 	public void dispose() {
 		skin.dispose();
-		batch.dispose();
 	}
 
 	public Skin getSkin() {
@@ -44,9 +39,5 @@ public class LDJamGame extends Game {
 
 	public void showGameScreen() {
 		setScreen(gameScreen);
-	}
-
-	public SpriteBatch getBatch() {
-		return batch;
 	}
 }
