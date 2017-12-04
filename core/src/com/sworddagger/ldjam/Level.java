@@ -12,6 +12,11 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.sworddagger.ldjam.actors.Guard;
+import com.sworddagger.ldjam.util.Animator;
+import com.sworddagger.ldjam.util.pathfinding.Grid2D;
+
+import java.util.List;
 
 import static com.sworddagger.ldjam.LDJamGame.TILE_SIZE;
 
@@ -24,12 +29,25 @@ public class Level {
 	private OrthogonalTiledMapRenderer tiledMapRenderer;
 	private Vector2 startPosition = new Vector2();
 
-	private Array<Rectangle> wallRects = new Array<Rectangle>();
+	private Array<Rectangle> wallRects = new Array();
+	private Array<Guard> guards = new Array();
+
+	private Grid2D grid;
+
+	double[][] map;
 
 	public Level(String map_name, OrthographicCamera camera) {
 		tmxMap = new TmxMapLoader().load(map_name);
 		tiledMapRenderer = new OrthogonalTiledMapRenderer(tmxMap);
 		tiledMapRenderer.setView(camera);
+		int width = Integer.parseInt(tmxMap.getProperties().get("width").toString());
+		int height = Integer.parseInt(tmxMap.getProperties().get("height").toString());
+		map = new double[width][height];
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				map[i][j] = 1;
+			}
+		}
 
 		for (MapLayer layer : tmxMap.getLayers()) {
 			MapObjects objects = layer.getObjects();
@@ -40,6 +58,43 @@ public class Level {
 			}
 		}
 		buildWalls();
+		populateGuards();
+		buildMap();
+		grid = new Grid2D(map, false);
+	}
+
+	private void buildMap() {
+		for (Rectangle wallRect : wallRects) {
+			int startColumn, endColumn;
+			int startRow, endRow;
+			startColumn = (int) (wallRect.x / TILE_SIZE);
+			startRow = (int) Math.floor((wallRect.y / TILE_SIZE));
+			endColumn = (int) ((wallRect.x + wallRect.width) / TILE_SIZE);
+			endRow = (int) Math.ceil(((wallRect.y + wallRect.height) / TILE_SIZE));
+			for (int i = startColumn; i < endColumn; i++) {
+				for (int j = startRow; j < endRow; j++) {
+					map[i][j] = -1;
+				}
+			}
+		}
+	}
+
+	private void populateGuards() {
+		MapObjects objects = tmxMap.getLayers().get("guards").getObjects();
+
+		for (MapObject object : objects) {
+			if (object instanceof RectangleMapObject) {
+				Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
+				Guard guard = new Guard("data/hero.png", 8, 3);
+				guard.setScale(2.0f);
+				guard.setWalkFrames(0, 3, Animator.DIRECTION.UP);
+				guard.setWalkFrames(4, 7, Animator.DIRECTION.DOWN);
+				guard.setWalkFrames(8, 11, Animator.DIRECTION.LEFT);
+				guard.setWalkFrames(12, 15, Animator.DIRECTION.RIGHT);
+				guard.setPosition(rectangle.x, rectangle.y);
+				guards.add(guard);
+			}
+		}
 	}
 
 	private void buildWalls() {
@@ -76,5 +131,13 @@ public class Level {
 			}
 		}
 		return true;
+	}
+
+	public Array<Guard> getGuards() {
+		return guards;
+	}
+
+	public List<Grid2D.MapNode> findPath(int startX, int startY, int endX, int endY) {
+		return grid.findPath(startX, startY, endX, endY);
 	}
 }

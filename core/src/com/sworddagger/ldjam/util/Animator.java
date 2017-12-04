@@ -21,8 +21,8 @@ import static com.sworddagger.ldjam.LDJamGame.TILE_SIZE;
 public class Animator extends Image {
 	private float interpolationAccumulator = 0;
 	private float TILES_PRE_SECOND = 0.5f;
-	private Vector2 target = new Vector2();
-	private Vector2 start = new Vector2();
+	protected Vector2 target = new Vector2();
+	protected Vector2 start = new Vector2();
 
 	// Constant rows and columns of the sprite sheet
 	private int FRAME_COLS;
@@ -32,12 +32,13 @@ public class Animator extends Image {
 	private Animation<TextureRegion> walkRightAnimation;
 	private Animation<TextureRegion> walkUpAnimation;
 	private Animation<TextureRegion> walkDownAnimation;
-	private boolean walkUp = false;
-	private boolean walkDown = false;
-	private boolean walkLeft = false;
-	private boolean walkRight = false;
+	protected boolean walkUp = false;
+	protected boolean walkDown = false;
+	protected boolean walkLeft = false;
+	protected boolean walkRight = false;
 	private DIRECTION facingDirection = DIRECTION.DOWN;
 	private Level level;
+	protected boolean npc;
 
 	public void startWalking(DIRECTION direction) {
 		switch (direction) {
@@ -144,6 +145,12 @@ public class Animator extends Image {
 		if (interpolationAccumulator > TILES_PRE_SECOND) {
 			interpolationAccumulator = 0;
 			start.set(target);
+			if (npc) {
+				walkUp = false;
+				walkRight = false;
+				walkLeft = false;
+				walkDown = false;
+			}
 		}
 		boolean walking = walkUp || walkDown || walkLeft || walkRight;
 		if (walking || interpolationAccumulator > 0) {
@@ -172,8 +179,10 @@ public class Animator extends Image {
 					}
 					facingDirection = DIRECTION.RIGHT;
 				}
-				if (!level.canWalk(start, target)) {
-					target.set(start);
+				if (!npc) {
+					if (!level.canWalk(start, target)) {
+						target.set(start);
+					}
 				}
 			}
 			interpolationAccumulator += delta;

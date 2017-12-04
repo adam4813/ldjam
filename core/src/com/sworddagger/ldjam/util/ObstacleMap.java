@@ -34,9 +34,9 @@ public class ObstacleMap {
 	}
 
 	// TODO use intersector class
-	public float getObstructionValue(Vector2 start, Vector2 end) {
+	public float getObstructionFactor(Vector2 start, Vector2 end) {
 		float obstruction = 1;
-		Vector2 direction_inv = new Vector2(start.cpy().sub(end));
+		Vector2 direction_inv = new Vector2(end.cpy().sub(start));
 		direction_inv.x = 1.0f / direction_inv.x;
 		direction_inv.y = 1.0f / direction_inv.y;
 
@@ -52,7 +52,7 @@ public class ObstacleMap {
 
 			tmin = Math.max(tmin, Math.min(ty1, ty2));
 			tmax = Math.min(tmax, Math.max(ty1, ty2));
-			if (tmax >= tmin) {
+			if (tmax >= Math.max(tmin, 0.0f)) {
 				obstruction *= 0.5;
 			}
 		}

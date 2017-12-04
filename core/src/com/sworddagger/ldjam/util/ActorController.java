@@ -2,6 +2,7 @@ package com.sworddagger.ldjam.util;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
+import com.sworddagger.ldjam.actors.Hero;
 
 /**
  * Created by Adam on 12/2/2017.
@@ -9,9 +10,11 @@ import com.badlogic.gdx.InputAdapter;
 
 public class ActorController extends InputAdapter {
 	private Animator actor;
+	private Hero hero;
 
 	public ActorController(Animator actor) {
 		this.actor = actor;
+		hero = (Hero) actor;
 	}
 
 	@Override
@@ -47,6 +50,12 @@ public class ActorController extends InputAdapter {
 				break;
 			case Input.Keys.D:
 				actor.stopWalking(Animator.DIRECTION.RIGHT);
+				break;
+			case Input.Keys.PLUS:
+				hero.setWeight(hero.getWeight() + 2);
+				break;
+			case Input.Keys.MINUS:
+				hero.setWeight(hero.getWeight() - 2);
 				break;
 		}
 		return false;
