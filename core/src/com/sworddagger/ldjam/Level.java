@@ -3,11 +3,11 @@ package com.sworddagger.ldjam;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.maps.Map;
-import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
@@ -32,6 +32,7 @@ public class Level {
 	private Vector2 startPosition = new Vector2();
 
 	private Array<Rectangle> wallRects = new Array();
+	private Array<Rectangle> chestRects = new Array();
 	private Array<Guard> guards = new Array();
 
 	private Grid2D grid;
@@ -51,19 +52,28 @@ public class Level {
 			}
 		}
 
-		for (MapLayer layer : tmxMap.getLayers()) {
-			MapObjects objects = layer.getObjects();
-			MapObject start = objects.get("start");
-			if (start != null) {
-				startPosition.x = Float.parseFloat(start.getProperties().get("x").toString());
-				startPosition.y = Float.parseFloat(start.getProperties().get("y").toString());
-			}
+		MapObjects objects = tmxMap.getLayers().get("events").getObjects();
+		MapObject start = objects.get("start");
+		if (start != null) {
+			startPosition.x = Float.parseFloat(start.getProperties().get("x").toString());
+			startPosition.y = Float.parseFloat(start.getProperties().get("y").toString());
 		}
 		buildWalls();
 		populateGuards();
+		populateChests();
 		buildMap();
 		buildNPCCollisionMap();
 		grid = new Grid2D(map, false);
+	}
+
+	private void populateChests() {
+		MapObjects objects = tmxMap.getLayers().get("chests").getObjects();
+
+		for (MapObject object : objects) {
+			if (object instanceof RectangleMapObject) {
+				chestRects.add(((RectangleMapObject) object).getRectangle());
+			}
+		}
 	}
 
 	private void buildNPCCollisionMap() {
@@ -163,6 +173,17 @@ public class Level {
 
 	public List<Grid2D.MapNode> findPath(int startX, int startY, int endX, int endY) {
 		return grid.findPath(startX, startY, endX, endY);
+	}
+
+	public float checkChestCollision(float x, float y) {
+		for (Rectangle chestRect : chestRects) {
+			if (chestRect.contains(x, y)) {
+				((TiledMapTileLayer)tmxMap.getLayers().get(1)).setCell((int)chestRect.x / TILE_SIZE, (int)chestRect.y / TILE_SIZE, null);
+				chestRects.removeValue(chestRect, true);
+				return 20;
+			}
+		}
+		return 0;
 	}
 
 	public void renderWalls() {

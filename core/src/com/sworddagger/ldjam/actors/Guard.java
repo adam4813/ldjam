@@ -14,6 +14,7 @@ import static com.sworddagger.ldjam.LDJamGame.TILE_SIZE;
 
 public class Guard extends Animator {
 	private float hearingCheck = 10;
+	private boolean alerted;
 
 	public void setPath(List<MapNode> path) {
 		this.path = path;
@@ -38,7 +39,7 @@ public class Guard extends Animator {
 	}
 
 	public boolean check(float totalCheck) {
-		return totalCheck >= hearingCheck;
+		return alerted = totalCheck >= hearingCheck;
 	}
 
 	@Override
@@ -71,5 +72,9 @@ public class Guard extends Animator {
 			}
 		}
 		super.act(delta);
+	}
+
+	public boolean isAlerted() {
+		return alerted;
 	}
 }

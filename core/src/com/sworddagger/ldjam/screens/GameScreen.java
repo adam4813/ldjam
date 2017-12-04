@@ -110,18 +110,13 @@ public class GameScreen extends ScreenAdapter {
 		Gdx.input.setInputProcessor(new InputMultiplexer(actorController, stage));
 	}
 
-	@Override
-	public void render(float delta) {
-		Gdx.gl.glClearColor(0, 0, 0, 1);
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		viewport.apply();
-		testLevel.render(new int[]{0, 1});
-		stage.act(delta);
-		stage.draw();
-		testLevel.render(new int[]{2});
+	private void update(float delta) {
+		int heroGridX = (int) Math.rint(hero.getX() / TILE_SIZE);
+		int heroGridY = (int) Math.rint(hero.getY() / TILE_SIZE);
+		float loot = testLevel.checkChestCollision(hero.getX(), hero.getY());
+		hero.setWeight(hero.getWeight() + loot);
 
 		Array<Guard> guards = testLevel.getGuards();
-		Batch batch = stage.getBatch();
 		Vector2 start = new Vector2(hero.getX() + TILE_SIZE / 2, hero.getY() + 8);
 		for (Guard guard : guards) {
 			Vector2 end = new Vector2(guard.getX() + TILE_SIZE / 2, guard.getY() + TILE_SIZE / 2);
@@ -129,14 +124,37 @@ public class GameScreen extends ScreenAdapter {
 			float falloff = 1 - distance / FALLOFF_RADIUS;
 			float obstructionFactor = obstacleMap.getObstructionFactor(start, end);
 			float totalCheck = (obstructionFactor * 1.5f) * falloff * hero.getWeight();
-			if (guard.check(totalCheck)) {
+			guard.check(totalCheck);
+			if (guard.isAlerted()) {
+				guard.setPath(testLevel.findPath((int) guard.getX() / TILE_SIZE,
+												 (int) guard.getY() / TILE_SIZE,
+												 heroGridX, heroGridY));
+			}
+		}
+	}
+
+	@Override
+	public void render(float delta) {
+		update(delta);
+		Gdx.gl.glClearColor(0, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		viewport.apply();
+		testLevel.render(new int[]{0, 1, 3});
+		stage.act(delta);
+		stage.draw();
+		testLevel.render(new int[]{2});
+
+		Array<Guard> guards = testLevel.getGuards();
+		Batch batch = stage.getBatch();
+		for (Guard guard : guards) {
+			if (guard.isAlerted()) {
 				label.setColor(Color.GREEN);
 			}
 			else {
 				label.setColor(Color.RED);
 			}
 			label.setPosition(guard.getX(), guard.getY());
-			label.setText(String.valueOf(totalCheck));
+			label.setText("!");
 			batch.begin();
 			label.draw(batch, 1.0f);
 			batch.end();
