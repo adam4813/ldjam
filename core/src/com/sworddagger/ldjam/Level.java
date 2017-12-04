@@ -62,7 +62,29 @@ public class Level {
 		buildWalls();
 		populateGuards();
 		buildMap();
+		buildNPCCollisionMap();
 		grid = new Grid2D(map, false);
+	}
+
+	private void buildNPCCollisionMap() {
+		MapObjects objects = tmxMap.getLayers().get("npc_collision").getObjects();
+
+		for (MapObject object : objects) {
+			if (object instanceof RectangleMapObject) {
+				Rectangle rectangle = ((RectangleMapObject) object).getRectangle();
+				int startColumn, endColumn;
+				int startRow, endRow;
+				startColumn = (int) (rectangle.x / TILE_SIZE);
+				startRow = (int) Math.rint((rectangle.y / TILE_SIZE));
+				endColumn = (int) ((rectangle.x + rectangle.width) / TILE_SIZE);
+				endRow = (int) Math.rint(((rectangle.y + rectangle.height) / TILE_SIZE));
+				for (int i = startColumn; i < endColumn; i++) {
+					for (int j = startRow; j < endRow; j++) {
+						map[j][i] = -1;
+					}
+				}
+			}
+		}
 	}
 
 	private void buildMap() {

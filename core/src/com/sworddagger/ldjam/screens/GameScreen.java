@@ -147,8 +147,6 @@ public class GameScreen extends ScreenAdapter {
 		batch.begin();
 		label.draw(batch, 1.0f);
 		batch.end();
-		testLevel.renderWalls();
-		testLevel.renderGrid();
 	}
 
 	@Override
@@ -167,9 +165,9 @@ public class GameScreen extends ScreenAdapter {
 		for (Guard guard : guards) {
 			Vector2 end = new Vector2(guard.getX() + TILE_SIZE / 2, guard.getY() + TILE_SIZE / 2);
 			float distance = start.dst2(end);
-			float falloff = 1 - distance / FALLOFF_RADIUS;
+			float falloff = 100 - distance / FALLOFF_RADIUS;
 			float obstructionFactor = obstacleMap.getObstructionFactor(start, end);
-			float totalCheck = (obstructionFactor * 1.5f) * falloff * item.getWeight() * 1000;
+			float totalCheck = (obstructionFactor * 1.5f) * falloff * item.getWeight();
 			if (guard.check(totalCheck)) {
 				guard.setPath(testLevel.findPath((int) Math.rint(guard.getX() / TILE_SIZE),
 												 (int) Math.rint(guard.getY() / TILE_SIZE),
