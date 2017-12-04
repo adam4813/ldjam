@@ -1,5 +1,6 @@
 package com.sworddagger.ldjam;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.maps.Map;
 import com.badlogic.gdx.maps.MapLayer;
@@ -19,6 +20,7 @@ import com.sworddagger.ldjam.util.pathfinding.Grid2D;
 import java.util.List;
 
 import static com.sworddagger.ldjam.LDJamGame.TILE_SIZE;
+import static com.sworddagger.ldjam.screens.GameScreen.DrawDebugRect;
 
 /**
  * Created by Adam on 12/2/2017.
@@ -68,12 +70,12 @@ public class Level {
 			int startColumn, endColumn;
 			int startRow, endRow;
 			startColumn = (int) (wallRect.x / TILE_SIZE);
-			startRow = (int) Math.floor((wallRect.y / TILE_SIZE));
+			startRow = (int) Math.rint((wallRect.y / TILE_SIZE));
 			endColumn = (int) ((wallRect.x + wallRect.width) / TILE_SIZE);
-			endRow = (int) Math.ceil(((wallRect.y + wallRect.height) / TILE_SIZE));
+			endRow = (int) Math.rint(((wallRect.y + wallRect.height) / TILE_SIZE));
 			for (int i = startColumn; i < endColumn; i++) {
 				for (int j = startRow; j < endRow; j++) {
-					map[i][j] = -1;
+					map[j][i] = -1;
 				}
 			}
 		}
@@ -139,5 +141,24 @@ public class Level {
 
 	public List<Grid2D.MapNode> findPath(int startX, int startY, int endX, int endY) {
 		return grid.findPath(startX, startY, endX, endY);
+	}
+
+	public void renderWalls() {
+		for (Rectangle wallRect : wallRects) {
+			DrawDebugRect(wallRect, Color.BLUE);
+		}
+	}
+
+	public void renderGrid() {
+		Rectangle rect = new Rectangle(0, 0, 32, 32);
+		for (int i = 0; i < 16; i++) {
+			for (int j = 0; j < 16; j++) {
+				if (map[j][i] > 0) {
+					rect.x = i * TILE_SIZE;
+					rect.y = j * TILE_SIZE;
+					DrawDebugRect(rect, Color.GREEN);
+				}
+			}
+		}
 	}
 }

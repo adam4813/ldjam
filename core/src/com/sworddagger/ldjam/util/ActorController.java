@@ -2,35 +2,37 @@ package com.sworddagger.ldjam.util;
 
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
+import com.sworddagger.ldjam.Item;
 import com.sworddagger.ldjam.actors.Hero;
+import com.sworddagger.ldjam.screens.GameScreen;
 
 /**
  * Created by Adam on 12/2/2017.
  */
 
 public class ActorController extends InputAdapter {
-	private Animator actor;
-	private Hero hero;
+	private final GameScreen gameScreen;
+	private final Hero hero;
 
-	public ActorController(Animator actor) {
-		this.actor = actor;
-		hero = (Hero) actor;
+	public ActorController(Hero hero, GameScreen gameScreen) {
+		this.hero = hero;
+		this.gameScreen = gameScreen;
 	}
 
 	@Override
 	public boolean keyDown(int keycode) {
 		switch (keycode) {
 			case Input.Keys.W:
-				actor.startWalking(Animator.DIRECTION.UP);
+				hero.startWalking(Animator.DIRECTION.UP);
 				break;
 			case Input.Keys.A:
-				actor.startWalking(Animator.DIRECTION.LEFT);
+				hero.startWalking(Animator.DIRECTION.LEFT);
 				break;
 			case Input.Keys.S:
-				actor.startWalking(Animator.DIRECTION.DOWN);
+				hero.startWalking(Animator.DIRECTION.DOWN);
 				break;
 			case Input.Keys.D:
-				actor.startWalking(Animator.DIRECTION.RIGHT);
+				hero.startWalking(Animator.DIRECTION.RIGHT);
 				break;
 		}
 		return false;
@@ -40,16 +42,16 @@ public class ActorController extends InputAdapter {
 	public boolean keyUp(int keycode) {
 		switch (keycode) {
 			case Input.Keys.W:
-				actor.stopWalking(Animator.DIRECTION.UP);
+				hero.stopWalking(Animator.DIRECTION.UP);
 				break;
 			case Input.Keys.A:
-				actor.stopWalking(Animator.DIRECTION.LEFT);
+				hero.stopWalking(Animator.DIRECTION.LEFT);
 				break;
 			case Input.Keys.S:
-				actor.stopWalking(Animator.DIRECTION.DOWN);
+				hero.stopWalking(Animator.DIRECTION.DOWN);
 				break;
 			case Input.Keys.D:
-				actor.stopWalking(Animator.DIRECTION.RIGHT);
+				hero.stopWalking(Animator.DIRECTION.RIGHT);
 				break;
 			case Input.Keys.PLUS:
 				hero.setWeight(hero.getWeight() + 2);
@@ -58,6 +60,15 @@ public class ActorController extends InputAdapter {
 				hero.setWeight(hero.getWeight() - 2);
 				break;
 		}
+		return false;
+	}
+
+	@Override
+	public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+		Item heldItem = hero.getHeldItem();
+
+		gameScreen.dropItem(heldItem, screenX, screenY);
+
 		return false;
 	}
 }

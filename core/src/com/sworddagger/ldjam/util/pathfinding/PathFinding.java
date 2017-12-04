@@ -70,7 +70,7 @@ public class PathFinding {
 				boolean contains = open.contains(neighbour);
 				if (!contains || tentG < gScore.get(neighbour)) {
 					gScore.put(neighbour, tentG);
-					fScore.put(neighbour, tentG + neighbour.getHeuristic(goal));
+					fScore.put(neighbour, tentG * neighbour.getHeuristic(goal));
 
 					if (contains) {
 						open.remove(neighbour);

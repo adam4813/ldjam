@@ -8,11 +8,13 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.sworddagger.ldjam.Item;
 import com.sworddagger.ldjam.LDJamGame;
 import com.sworddagger.ldjam.Level;
 import com.sworddagger.ldjam.actors.Guard;
@@ -21,6 +23,7 @@ import com.sworddagger.ldjam.util.ActorController;
 import com.sworddagger.ldjam.util.Animator;
 import com.sworddagger.ldjam.util.ObstacleMap;
 
+import static com.sworddagger.ldjam.LDJamGame.SCREEN_HEIGHT;
 import static com.sworddagger.ldjam.LDJamGame.TILE_SIZE;
 
 /**
@@ -62,8 +65,10 @@ public class GameScreen extends ScreenAdapter {
 
 		setupHero();
 		debugRenderer.setProjectionMatrix(viewport.getCamera().combined);
-		Guard guard = testLevel.getGuards().first();
-		guard.setPath(testLevel.findPath((int)guard.getX() / TILE_SIZE, (int)guard.getY() / TILE_SIZE, 5, 10));
+		Guard guard = testLevel.getGuards().get(1);
+		guard.setPath(
+				testLevel.findPath((int) guard.getX() / TILE_SIZE, (int) guard.getY() / TILE_SIZE,
+								   5, 6));
 	}
 
 	private static ShapeRenderer debugRenderer = new ShapeRenderer();
@@ -73,6 +78,15 @@ public class GameScreen extends ScreenAdapter {
 		debugRenderer.begin(ShapeRenderer.ShapeType.Line);
 		debugRenderer.setColor(color);
 		debugRenderer.line(start, end);
+		debugRenderer.end();
+		Gdx.gl.glLineWidth(1);
+	}
+
+	public static void DrawDebugRect(Rectangle rect, Color color) {
+		Gdx.gl.glLineWidth(2);
+		debugRenderer.begin(ShapeRenderer.ShapeType.Line);
+		debugRenderer.setColor(color);
+		debugRenderer.rect(rect.x, rect.y, rect.width, rect.height);
 		debugRenderer.end();
 		Gdx.gl.glLineWidth(1);
 	}
@@ -87,7 +101,7 @@ public class GameScreen extends ScreenAdapter {
 		Vector2 startPosition = testLevel.getStartPosition();
 		hero.setPosition(startPosition.x, startPosition.y);
 		hero.setLevel(testLevel);
-		actorController = new ActorController(hero);
+		actorController = new ActorController(hero, this);
 		stage.addActor(hero);
 	}
 
@@ -133,6 +147,8 @@ public class GameScreen extends ScreenAdapter {
 		batch.begin();
 		label.draw(batch, 1.0f);
 		batch.end();
+		testLevel.renderWalls();
+		testLevel.renderGrid();
 	}
 
 	@Override
@@ -143,5 +159,24 @@ public class GameScreen extends ScreenAdapter {
 	@Override
 	public void dispose() {
 		stage.dispose();
+	}
+
+	public void dropItem(Item item, int screenX, int screenY) {
+		Vector2 start = new Vector2(screenX + TILE_SIZE / 2, screenY + 8);
+		Array<Guard> guards = testLevel.getGuards();
+		for (Guard guard : guards) {
+			Vector2 end = new Vector2(guard.getX() + TILE_SIZE / 2, guard.getY() + TILE_SIZE / 2);
+			float distance = start.dst2(end);
+			float falloff = 1 - distance / FALLOFF_RADIUS;
+			float obstructionFactor = obstacleMap.getObstructionFactor(start, end);
+			float totalCheck = (obstructionFactor * 1.5f) * falloff * item.getWeight() * 1000;
+			if (guard.check(totalCheck)) {
+				guard.setPath(testLevel.findPath((int) Math.rint(guard.getX() / TILE_SIZE),
+												 (int) Math.rint(guard.getY() / TILE_SIZE),
+												 (int) Math.rint(screenX / TILE_SIZE),
+												 (int) Math.rint(
+														 (SCREEN_HEIGHT - screenY) / TILE_SIZE)));
+			}
+		}
 	}
 }
