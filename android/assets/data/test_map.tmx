@@ -63,7 +63,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup name="collision" visible="0">
+ <objectgroup name="collision">
   <object id="3" type="column_base" x="192" y="194" width="32" height="8"/>
   <object id="4" type="column_base" x="256" y="194" width="32" height="8"/>
   <object id="5" type="column_base" x="320" y="194" width="32" height="8"/>
